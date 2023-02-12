@@ -13,6 +13,8 @@ public class MemoryKarte extends Button {
 	private int bildPos;
 	private Boolean umgedreht;
 	private Boolean nochImSpiel;
+	
+	private MemoryFeld spielfeld;
 
 	class KartenListener implements EventHandler<ActionEvent> {
 
@@ -23,13 +25,14 @@ public class MemoryKarte extends Button {
 			if (umgedreht == false) {
 				setGraphic(bildVorne);
 				umgedreht = true;
+				spielfeld.karteOeffnen(MemoryKarte.this);
 			}
 
 		}
 
 	}
 
-	public MemoryKarte(String vorne, int bildID) {
+	public MemoryKarte(String vorne, int bildID, MemoryFeld spielfeld) {
 			
 		bildVorne = new ImageView(vorne);
 		bildHinten = new ImageView("grafiken/back.jpg");
@@ -37,6 +40,7 @@ public class MemoryKarte extends Button {
 		setGraphic(bildHinten);
 
 		this.bildID = bildID;
+		this.spielfeld = spielfeld;
 		umgedreht = false;
 		nochImSpiel = true;
 

@@ -1,7 +1,11 @@
 package memory;
 
-import javax.management.loading.PrivateClassLoader;
+import java.awt.PageAttributes;
 
+import javax.management.loading.PrivateClassLoader;
+import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
+
+import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
@@ -72,7 +76,7 @@ public class MemoryFeld {
 		int count = 0;
 		for (int i = 0; i <= 41; i++) {
 
-			karten[i] = new MemoryKarte(bilder[count], count);
+			karten[i] = new MemoryKarte(bilder[count], count, this);
 
 			if ((i + 1) % 2 == 0)
 				count++;
@@ -89,6 +93,78 @@ public class MemoryFeld {
 			karten[i].setBildPos(i);
 
 		}
+	}
+
+	public void karteOeffnen(MemoryKarte karte) {
+
+		int kartenID, kartenPos;
+		paar[umgedrehtKarten] = karte;
+		kartenID = karte.getBildID();
+		kartenPos = karte.getBildPos();
+
+		if (gemerkteKarten[0][kartenID] == -1)
+			gemerkteKarten[0][kartenID] = kartenPos;
+		else if (gemerkteKarten[0][kartenID] != kartenPos)
+			gemerkteKarten[1][kartenID] = kartenPos;
+		umgedrehtKarten++;
+
+		if (umgedrehtKarten == 2) {
+			paarPruefen(kartenID);
+			karteSchliessen();
+		}
+		if (computerPunkte + menschPunkte == 21) {
+			Platform.exit();
+		}
+
+	}
+
+	private void paarPruefen(int kartenID) {
+
+		if (paar[0].getBildID() == paar[1].getBildID()) {
+			paarGefunden();
+			gemerkteKarten[0][kartenID] = -2;
+			gemerkteKarten[1][kartenID] = -2;
+		}
+
+	}
+
+//	the mothod add the punkte when a pair is finded
+	private void paarGefunden() {
+		if (spieler == 0) {
+			menschPunkte++;
+			menschPunktLabel.setText(Integer.toString(menschPunkte));
+		} else {
+			computerPunkte++;
+			computerPunktLabel.setText(Integer.toString(computerPunkte));
+		}
+	}
+
+//	the mothod flips die carte back and removes them from the play
+	private void karteSchliessen() {
+		boolean raus = false;
+		if (paar[0].getBildID() == paar[1].getBildID()) {
+			raus = true;
+		}
+		paar[0].rueckseiteZeigen(raus);
+		paar[1].rueckseiteZeigen(raus);
+
+		umgedrehtKarten = 0;
+		if (raus = false)
+			spielerWechseln();
+		else if (spieler == 1)
+			computerZug();
+	}
+
+	private void spielerWechseln() {
+		if (spieler == 0) {
+			spieler = 1;
+			computerZug();
+		} else
+			spieler = 0;
+	}
+	
+	private void computerZug() {
+//		something is missing hier
 	}
 
 }
