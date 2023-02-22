@@ -20,9 +20,10 @@ public class MemoryKarte extends Button {
 
 		@Override
 		public void handle(ActionEvent arg0) {
-			if (nochImSpiel == false)
+			
+			if ((nochImSpiel == false) || (spielfeld.zugErlaubt() == false))
 				return;
-			if (umgedreht == false) {
+			if (umgedreht == false ) {
 				setGraphic(bildVorne);
 				umgedreht = true;
 				spielfeld.karteOeffnen(MemoryKarte.this);
@@ -68,6 +69,18 @@ public class MemoryKarte extends Button {
 
 	public void setBildPos(int bildPos) {
 		this.bildPos = bildPos;
+	}
+	public boolean isUmgedreht() {
+		return umgedreht;
+	}
+	
+	public boolean isNocnInSpiel() {
+		return nochImSpiel;
+	}
+	
+	public void vorderseiteZeigen() {
+		setGraphic(bildVorne);
+		umgedreht = true;
 	}
 
 }

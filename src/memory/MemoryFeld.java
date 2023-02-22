@@ -1,14 +1,21 @@
 package memory;
 
-import java.awt.PageAttributes;
+import java.util.Collections;
+import java.util.Arrays;
 
-import javax.management.loading.PrivateClassLoader;
-import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
-
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
+import javafx.util.Duration;
 
 public class MemoryFeld {
 
@@ -31,6 +38,18 @@ public class MemoryFeld {
 	private int spieler;
 //	computer saves here where lies the opposit one
 	private int[][] gemerkteKarten;
+//	for the timer
+	private Timeline timer;
+//	for current feld
+	private FlowPane myfeld;
+
+	class TimerHandler implements EventHandler<ActionEvent> {
+
+		@Override
+		public void handle(ActionEvent arg0) {
+			karteSchliessen();
+		}
+	}
 
 	public MemoryFeld() {
 
@@ -49,11 +68,13 @@ public class MemoryFeld {
 				gemerkteKarten[ausen][innen] = -1;
 			}
 		}
+		
 	}
 
 	public FlowPane initGUI(FlowPane feld) {
 
 		kartenZeichen(feld);
+		this.myfeld = feld;
 		menschPunktLabel = new Label();
 		computerPunktLabel = new Label();
 		menschPunktLabel.setText(Integer.toString(menschPunkte));
@@ -65,6 +86,7 @@ public class MemoryFeld {
 		tempGrid.add(new Label("Computer :"), 0, 1);
 		tempGrid.add(computerPunktLabel, 1, 1);
 		feld.getChildren().add(tempGrid);
+		
 		return feld;
 
 	}
@@ -72,7 +94,6 @@ public class MemoryFeld {
 	private void kartenZeichen(FlowPane feld) {
 
 //			a new card generate
-
 		int count = 0;
 		for (int i = 0; i <= 41; i++) {
 
@@ -83,16 +104,21 @@ public class MemoryFeld {
 
 		}
 
-//			put the cards at the playing field
+//		mix the cards in array
+		Collections.shuffle(Arrays.asList(karten));
+		
+		
+		
 
+//			put the cards at the playing field
 		for (int i = 0; i <= 41; i++) {
-			feld.getChildren().add(karten[i]);
+			feld.getChildren().add(karten[i]);			
 
 //				put the position of card
-
 			karten[i].setBildPos(i);
 
 		}
+		this.myfeld = feld;
 	}
 
 	public void karteOeffnen(MemoryKarte karte) {
@@ -110,12 +136,55 @@ public class MemoryFeld {
 
 		if (umgedrehtKarten == 2) {
 			paarPruefen(kartenID);
-			karteSchliessen();
+//			karteSchliessen();
+			timer = new Timeline(new KeyFrame(Duration.millis(2000), new TimerHandler()));
+			timer.play();
 		}
 		if (computerPunkte + menschPunkte == 21) {
-			Platform.exit();
+//			Platform.exit();
+			endeAlertZeichen();
+
 		}
 
+	}
+
+	private void endeAlertZeichen() {
+		Alert endeAlert = new Alert(AlertType.INFORMATION, "", new ButtonType("beenden", ButtonData.NO), new ButtonType("neu Spiel", ButtonData.YES));
+
+		if (computerPunkte > menschPunkte)
+			endeAlert.setHeaderText("Computer hat Gewonnen !\n" + " Er hat " + computerPunkte + "punkten");
+		else
+			endeAlert.setHeaderText("Sie haben Gewonnen !\n" + "Sie haben " + menschPunkte + "punkten");
+
+		endeAlert.setTitle("Das Spiel is beendet");
+
+		endeAlert.showAndWait();
+
+		if (endeAlert.getResult().getButtonData() == ButtonData.NO)
+			Platform.exit();
+		if(endeAlert.getResult().getButtonData() == ButtonData.YES)
+			neuSpiel();
+
+	}
+
+	private void neuSpiel() {
+		
+		menschPunkte = 0;
+		computerPunkte = 0;
+		umgedrehtKarten = 0;
+		
+//		human begins
+		spieler = 0;
+		
+//		no saves carts
+		for (int ausen = 0; ausen < 2; ausen++) {
+			for (int innen = 0; innen < 21; innen++) {
+				gemerkteKarten[ausen][innen] = -1;
+			}
+		}
+		myfeld.getChildren().clear();
+		initGUI(myfeld);
+	
 	}
 
 	private void paarPruefen(int kartenID) {
@@ -141,6 +210,7 @@ public class MemoryFeld {
 
 //	the mothod flips die carte back and removes them from the play
 	private void karteSchliessen() {
+
 		boolean raus = false;
 		if (paar[0].getBildID() == paar[1].getBildID()) {
 			raus = true;
@@ -149,22 +219,77 @@ public class MemoryFeld {
 		paar[1].rueckseiteZeigen(raus);
 
 		umgedrehtKarten = 0;
-		if (raus = false)
+		if (raus == false) {
+
 			spielerWechseln();
-		else if (spieler == 1)
+
+		} else if (spieler == 1)
 			computerZug();
 	}
 
 	private void spielerWechseln() {
+
 		if (spieler == 0) {
 			spieler = 1;
 			computerZug();
 		} else
 			spieler = 0;
 	}
-	
+
 	private void computerZug() {
-//		something is missing hier
+
+		int spielStarke = 1;
+
+		int kartenZahlen = 0;
+		int zufall = 0;
+		boolean treffer = false;
+
+		if ((int) (Math.random() * spielStarke) == 0) {
+			// search a pair. in same position in different dementions must be two cards
+			while ((kartenZahlen < 21) && (treffer == false)) {
+				// the value must not be -1 or -2
+				if ((gemerkteKarten[0][kartenZahlen]) >= 0 && (gemerkteKarten[1][kartenZahlen]) >= 0) {
+					treffer = true;
+//					karten[gemerkteKarten[0][kartenZahlen]].fire();
+//					karten[gemerkteKarten[1][kartenZahlen]].fire();
+					karten[gemerkteKarten[0][kartenZahlen]].vorderseiteZeigen();
+					karteOeffnen(karten[gemerkteKarten[0][kartenZahlen]]);
+					karten[gemerkteKarten[1][kartenZahlen]].vorderseiteZeigen();
+					karteOeffnen(karten[gemerkteKarten[1][kartenZahlen]]);
+
+				}
+				kartenZahlen++;
+			}
+		}
+		if (treffer == false) {
+			do {
+				zufall = (int) (Math.random() * karten.length);
+			} while (karten[zufall].isNocnInSpiel() == false);
+//			karten[zufall].fire();
+			karten[zufall].vorderseiteZeigen();
+			karteOeffnen(karten[zufall]);
+
+			do {
+				zufall = (int) (Math.random() * karten.length);
+			} while ((karten[zufall].isNocnInSpiel() == false) || (karten[zufall].isUmgedreht() == true));
+//			karten[zufall].fire();
+			karten[zufall].vorderseiteZeigen();
+			karteOeffnen(karten[zufall]);
+
+		}
+
+	}
+
+	public boolean zugErlaubt() {
+		boolean erlaubt = true;
+//		turn of computer? 
+		if (spieler == 1)
+			erlaubt = false;
+//		two cards are turned jet?
+		if (umgedrehtKarten == 2)
+			erlaubt = false;
+
+		return erlaubt;
 	}
 
 }
