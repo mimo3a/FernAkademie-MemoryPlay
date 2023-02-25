@@ -15,7 +15,7 @@ public class MemoryFX extends Application{
 		
 		System.out.println("new start");
 		FlowPane rootNode = new MemoryFeld().initGUI(new FlowPane());
-		Scene meinScene = new Scene(rootNode, 480, 560);
+		Scene meinScene = new Scene(rootNode, 480, 600);
 		meinStage.setTitle("Memory");
 		meinStage.setScene(meinScene);
 		meinStage.setResizable(false);

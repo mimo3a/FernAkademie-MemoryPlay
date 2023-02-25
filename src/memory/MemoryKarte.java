@@ -62,6 +62,10 @@ public class MemoryKarte extends Button {
 	public int getBildID() {
 		return bildID;
 	}
+	
+	public void setBildId(int id) {
+		this.bildID = id;
+	}
 
 	public int getBildPos() {
 		return bildPos;
@@ -81,6 +85,9 @@ public class MemoryKarte extends Button {
 	public void vorderseiteZeigen() {
 		setGraphic(bildVorne);
 		umgedreht = true;
+	}
+	public ImageView getBildVorne() {
+		return bildVorne;
 	}
 
 }
