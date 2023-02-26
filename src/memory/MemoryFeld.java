@@ -1,7 +1,7 @@
 package memory;
 
 import java.util.Collections;
-
+import java.security.PublicKey;
 import java.util.Arrays;
 
 import javafx.animation.KeyFrame;
@@ -46,6 +46,7 @@ public class MemoryFeld {
 //	for current feld
 	private FlowPane myfeld;
 	private Button schummelnButton;
+	int i = 0;
 
 	class TimerHandler implements EventHandler<ActionEvent> {
 
@@ -167,14 +168,18 @@ public class MemoryFeld {
 
 		if (umgedrehtKarten == 2) {
 			paarPruefen(kartenID);
-//			karteSchliessen();			
-			timer = new Timeline(new KeyFrame(Duration.millis(500), new TimerHandler()));
+
+			timer = new Timeline(new KeyFrame(Duration.millis(2000), new TimerHandler()));
 			timer.play();
+			
+			
+
 		}
 		if (computerPunkte + menschPunkte == 21) {
+			
 //			Platform.exit();
 			endeAlertZeichen();
-
+			
 		}
 
 	}
@@ -291,6 +296,7 @@ public class MemoryFeld {
 			while ((kartenZahlen < 21) && (treffer == false)) {
 				// the value must not be -1 or -2
 				if ((gemerkteKarten[0][kartenZahlen]) >= 0 && (gemerkteKarten[1][kartenZahlen]) >= 0) {
+
 					treffer = true;
 //					karten[gemerkteKarten[0][kartenZahlen]].fire();
 //					karten[gemerkteKarten[1][kartenZahlen]].fire();
